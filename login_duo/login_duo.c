@@ -42,6 +42,7 @@ struct login_ctx {
     const char  *duouser;
     const char  *host;
     uid_t        uid;
+    int          do_login;
 };
 
 static void
@@ -248,8 +249,7 @@ do_auth(struct login_ctx *ctx, const char *cmd)
     }
 
     /* Special handling for non-interactive sessions */
-    if ((p = getenv("SSH_ORIGINAL_COMMAND")) != NULL ||
-        !isatty(STDIN_FILENO)) {
+    if ((p = getenv("SSH_ORIGINAL_COMMAND")) != NULL || !isatty(STDIN_FILENO) || !ctx->do_login ) {
         /* Try to support automatic one-shot login */
         duo_set_conv_funcs(duo, NULL, NULL, NULL);
         flags = (DUO_FLAG_SYNC|DUO_FLAG_AUTO);
@@ -401,7 +401,7 @@ version(void)
 static void
 usage(void)
 {
-    die("Usage: login_duo [-v] [-c config] [-d] [-f duouser] [-h host] [prog [args...]]");
+    die("Usage: login_duo [-v] [-c config] [-d] [-f duouser] [-h host] [-n] [prog [args...]]");
 }
 
 int
@@ -415,7 +415,10 @@ main(int argc, char *argv[])
 
     memset(ctx, 0, sizeof(ctx));
 
-    while ((c = getopt(argc, argv, "vc:df:h:?")) != -1) {
+    // issue login shell by default when run as root and successful duo_auth
+    ctx->do_login = 1;
+
+    while ((c = getopt(argc, argv, "vc:df:h:n?")) != -1) {
         switch (c) {
         case 'v':
             version();
@@ -431,6 +434,9 @@ main(int argc, char *argv[])
             break;
         case 'h':
             ctx->host = optarg;
+            break;
+        case 'n': // do not exec login after successful duo_auth
+            ctx->do_login = 0;
             break;
         default:
             usage();
@@ -475,7 +481,12 @@ main(int argc, char *argv[])
             }
         }
     } else {
+
         char *cmd = get_command(argc, argv);
+
+        // tmb - running as root, no login wanted. Just EXIT_SUCCESS
+        if (!ctx->do_login)
+           exit(do_auth (ctx, cmd));
 
         /* Non-setuid root operation or running as root. */
         if (do_auth(ctx, cmd) == EXIT_SUCCESS) {
