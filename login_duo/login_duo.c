@@ -485,9 +485,10 @@ main(int argc, char *argv[])
 
         char *cmd = get_command(argc, argv);
 
-        /* tmb - running as root, no login wanted. Just EXIT_SUCCESS */
-        if (!ctx->do_login)
+        /* no login shell wanted. Just EXIT_FAILURE/SUCCESS */
+        if (!ctx->do_login) {
            exit(do_auth (ctx, cmd));
+        }
 
         /* Non-setuid root operation or running as root. */
         if (do_auth(ctx, cmd) == EXIT_SUCCESS) {
