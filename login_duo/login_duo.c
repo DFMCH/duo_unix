@@ -415,7 +415,7 @@ main(int argc, char *argv[])
 
     memset(ctx, 0, sizeof(ctx));
 
-    // issue login shell by default when run as root and successful duo_auth
+    /* issue login shell by default when run as root and successful duo_auth */
     ctx->do_login = 1;
 
     while ((c = getopt(argc, argv, "vc:df:h:n?")) != -1) {
@@ -435,7 +435,7 @@ main(int argc, char *argv[])
         case 'h':
             ctx->host = optarg;
             break;
-        case 'n': // do not exec login after successful duo_auth
+        case 'n': /* do not exec login after successful duo_auth */
             ctx->do_login = 0;
             break;
         default:
@@ -447,7 +447,7 @@ main(int argc, char *argv[])
 
     ctx->uid = getuid();
 
-    // only when exec()'ing a login shell and not root
+    /* only when exec()'ing a login shell and not root */
     if ( (geteuid() != ctx->uid) && (ctx->do_login) ) {
         /* Setuid-root operation protecting private config. */
         if (ctx->config != NULL || ctx->duouser != NULL) {
@@ -485,7 +485,7 @@ main(int argc, char *argv[])
 
         char *cmd = get_command(argc, argv);
 
-        // tmb - running as root, no login wanted. Just EXIT_SUCCESS
+        /* tmb - running as root, no login wanted. Just EXIT_SUCCESS */
         if (!ctx->do_login)
            exit(do_auth (ctx, cmd));
 
