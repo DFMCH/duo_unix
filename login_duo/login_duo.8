@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 login_duo
 .Op Fl d
+.Op Fl n
 .Op Fl c Ar file
 .Op Fl h Ar host
 .Op Fl f Ar user
@@ -23,6 +24,8 @@ Specify an alternate configuration file to load. Default is
 .Pa /etc/duo/login_duo.conf
 .It Fl d
 Debug mode; send logs to stderr instead of syslog.
+.It Fl n
+No login shell. Send push and exit with EXIT_FAILURE or EXIT_SUCCESS
 .It Fl h
 Specify the remote IP address for this login (normally 
 taken from the
