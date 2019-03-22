@@ -447,10 +447,11 @@ main(int argc, char *argv[])
 
     ctx->uid = getuid();
 
-    if (geteuid() != ctx->uid) {
+    // only when exec()'ing a login shell and not root
+    if ( (geteuid() != ctx->uid) && (ctx->do_login) ) {
         /* Setuid-root operation protecting private config. */
         if (ctx->config != NULL || ctx->duouser != NULL) {
-            die("Only root may specify -c or -f");
+            die("Only root may specify -c or -f (without -n)");
         }
         if ((pw = getpwnam(DUO_PRIVSEP_USER)) == NULL) {
             die("User '%s' not found", DUO_PRIVSEP_USER);
